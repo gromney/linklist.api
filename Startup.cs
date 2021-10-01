@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LinkList.api.Configurations;
+using LinkList.api.Domain;
+using LinkList.api.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,8 +15,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 
-namespace link_list.api
+namespace LinkList.api
 {
     public class Startup
     {
@@ -26,22 +31,48 @@ namespace link_list.api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("LinkListApp", policy =>
+                {
+                    policy.WithOrigins("https://localhost:4200", "http://localhost:4200");
+                    policy.WithHeaders("authorization");
+                });
+            });
+
+            var mongoOptions = Configuration.GetSection(nameof(MongoDbOptions));
+            services.Configure<MongoDbOptions>(mongoOptions);
+
+            services.AddSingleton<IMongoClient, MongoClient>(op => new MongoClient(Configuration.GetConnectionString("MongoDb")));
+            services.AddTransient<ILinkListRepository, LinkListRepository>();
+
+            services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    }).AddJwtBearer(options =>
+                    {
+                        options.Authority = "https://dev-z8m0u69q.us.auth0.com/";
+                        options.Audience = "api.linklist.com";
+                    });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "link_list.api", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "LinkList.api", Version = "v1" });
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("LinkListApp");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "link_list.api v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LinkList.api v1"));
             }
 
             app.UseHttpsRedirection();
@@ -49,6 +80,7 @@ namespace link_list.api
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

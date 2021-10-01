@@ -1,6 +1,6 @@
 using System;
 
-namespace link_list.api
+namespace LinkList.api
 {
     public class WeatherForecast
     {

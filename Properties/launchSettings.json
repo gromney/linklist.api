@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "link_list.api": {
+    "LinkList.api": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,
