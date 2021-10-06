@@ -1,4 +1,6 @@
 name: .NET
+env:
+  AZURE_WEBAPP_NAME: link-list.api    # set this to your application's name
 
 on:
   push:
@@ -20,4 +22,19 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish
+      run: dotnet publish -c Release -o dotnetcoreapi
+
+- name: Azure WebApp Deploy
+  uses: Azure/webapps-deploy@v2
+  with:
+    # Name of the Azure Web App
+    app-name: ${{ env.AZURE_WEBAPP_NAME }}
+    # Applies to Web Apps(Windows and Linux) and Web App Containers(linux). Multi container scenario not supported. Publish profile (*.publishsettings) file contents with Web Deploy secrets
+    publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}# optional
+    # Enter an existing Slot other than the Production slot
+    slot-name: # optional, default is production
+    # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
+    package: './dotnetcoreapi' # optional, default is .
+   
