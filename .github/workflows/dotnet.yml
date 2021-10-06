@@ -1,6 +1,6 @@
 name: .NET
 env:
-  AZURE_WEBAPP_NAME: link-list.api    # set this to your application's name
+  AZURE_WEBAPP_NAME: link-list-api    # set this to your application's name
 
 on:
   push:
