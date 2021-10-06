@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using link_list.api;
 using LinkList.api.Configurations;
 using LinkList.api.Domain;
 using LinkList.api.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -35,8 +37,11 @@ namespace LinkList.api
             {
                 options.AddPolicy("LinkListApp", policy =>
                 {
-                    policy.WithOrigins("https://localhost:4200", "http://localhost:4200");
-                    policy.WithHeaders("authorization");
+                    // policy.WithOrigins("https://localhost:4200", "http://localhost:4200");
+                    // policy.WithHeaders("authorization");
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyOrigin();
+                    policy.AllowAnyMethod();
                 });
             });
 
@@ -52,9 +57,14 @@ namespace LinkList.api
                         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     }).AddJwtBearer(options =>
                     {
-                        options.Authority = "https://dev-z8m0u69q.us.auth0.com/";
-                        options.Audience = "api.linklist.com";
+                        options.Authority = "https://gromney-test.us.auth0.com/";
+                        options.Audience = "https://link-list.api/";
                     });
+            services.AddAuthorization(option =>
+            {
+                option.AddPolicy("from:app", policy => policy.Requirements.Add(new HasIssuerRequirement("https://gromney-test.us.auth0.com/")));
+            });
+            services.AddSingleton<IAuthorizationHandler,HasIssuerHandler>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -79,8 +89,8 @@ namespace LinkList.api
 
             app.UseRouting();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
