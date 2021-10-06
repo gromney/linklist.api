@@ -21,9 +21,9 @@ namespace LinkList.api.Repositories
             collection = database.GetCollection<LinkListModel>(mongoOptions.Value.LinkListCollection);
         }
 
-        public async Task<Response<List<LinkListModel>>> GetlAll()
+        public async Task<Response<List<LinkListModel>>> GetlAll(string userId)
         {
-            var filter = Builders<LinkListModel>.Filter.Empty;
+            var filter = Builders<LinkListModel>.Filter.Eq(x => x.UserId,userId);
             var result = await collection.FindAsync(filter).Result.ToListAsync();
 
             var response = new Response<List<LinkListModel>>(result);
@@ -70,6 +70,7 @@ namespace LinkList.api.Repositories
 
             var newList = new LinkListModel
             {
+                UserId = request.UserId,
                 Title = request.Title,
                 Description = request.Description,
                 Links = request.Links
@@ -121,7 +122,7 @@ namespace LinkList.api.Repositories
 
 public interface ILinkListRepository
 {
-    Task<Response<List<LinkListModel>>> GetlAll();
+    Task<Response<List<LinkListModel>>> GetlAll(string userId);
     Task<Response<LinkListModel>> GetCollection(string title);
     Task<Response<bool>> Available(string title);
     Task<Response<LinkListModel>> Publish(CreateLinkListRequest request);

@@ -6,6 +6,7 @@ namespace LinkList.api.Contracts
 {
     public class CreateLinkListRequest
     {
+        public string UserId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public List<Link> Links { get; set; }

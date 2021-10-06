@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using LinkList.api.Contracts;
 using LinkList.api.Domain;
@@ -21,7 +22,8 @@ namespace LinkList.api.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var response = await repository.GetlAll();
+            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await repository.GetlAll(userId);
 
             if (!response.Success)
             {
@@ -52,7 +54,7 @@ namespace LinkList.api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateLinkListRequest request)
         {
-
+            request.UserId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var response = await repository.Publish(request);
             if (!response.Success)
             {
