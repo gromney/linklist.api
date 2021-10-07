@@ -64,7 +64,7 @@ namespace LinkList.api
             {
                 option.AddPolicy("from:app", policy => policy.Requirements.Add(new HasIssuerRequirement("https://gromney-test.us.auth0.com/")));
             });
-            services.AddSingleton<IAuthorizationHandler,HasIssuerHandler>();
+            services.AddSingleton<IAuthorizationHandler, HasIssuerHandler>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -81,9 +81,10 @@ namespace LinkList.api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LinkList.api v1"));
             }
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LinkList.api v1"));
 
             app.UseHttpsRedirection();
 
